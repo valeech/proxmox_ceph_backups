@@ -112,15 +112,15 @@ for LOCAL_IMAGE in $IMAGES; do
  	   	echo "[$(date '+%m/%d/%Y:%H:%M:%S')] ceph_backup: rbd snap protect ${SOURCEPOOL}/${LOCAL_IMAGE}@${TODAY}" >>$LOG_FILE
  	   	rbd snap protect "${SOURCEPOOL}"/"${LOCAL_IMAGE}"@"${TODAY}"  >>$LOG_FILE 2>&1
  	   	SNAPBACKUP=true
- 	   	LATEST_SNAP=$(rbd snap ls "${SOURCEPOOL}"/"${LOCAL_IMAGE}" | grep -v "SNAPID" |sort | head -n 1 |awk '{print $2}')
- 	   	OLDEST_SNAP=$(rbd snap ls "${SOURCEPOOL}"/"${LOCAL_IMAGE}" | grep -v "SNAPID" |sort -r | head -n 1 |awk '{print $2}')
+ 	   	LATEST_SNAP=$(rbd snap ls "${SOURCEPOOL}"/"${LOCAL_IMAGE}" | grep -v "SNAPID" | sort -r | head -n 1 |awk '{print $2}')
+ 	   	OLDEST_SNAP=$(rbd snap ls "${SOURCEPOOL}"/"${LOCAL_IMAGE}" | grep -v "SNAPID" | sort | head -n 1 |awk '{print $2}')
 
  	   	#Cleanup backups retaining 3 full snaps and diffs in between from file system and remove old snaps from ceph
  	   	echo "[$(date '+%m/%d/%Y:%H:%M:%S')] ceph_backup: Cleanup old image backups" >>$LOG_FILE
  	   	REFERENCEIMG=$(find "${IMAGE_DIR}" -name *.img -type f -printf '%T+ %f\n' | sort -r | awk '{print $2}'| sed '3q;d')
  	   	#if we find files old enough to delete
  	   	if [[ $REFERENCEIMG ]]; then
-        	find "${IMAGE_DIR}" -type f ! -newer "${REFERENCEIMG}" ! -name "${REFERENCEIMG}" -delete
+        	find "${IMAGE_DIR}" -type f ! -newer "${IMAGE_DIR}"/"${REFERENCEIMG}" ! -name "${REFERENCEIMG}" -delete
  	   	fi
  	   	echo "[$(date '+%m/%d/%Y:%H:%M:%S')] ceph_backup: rbd snap unprotect ${SOURCEPOOL}/${LOCAL_IMAGE}@${OLDEST_SNAP}" >>$LOG_FILE
  	   	rbd snap unprotect "${SOURCEPOOL}"/"${LOCAL_IMAGE}"@"${OLDEST_SNAP}"
